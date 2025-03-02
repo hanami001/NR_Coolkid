@@ -7,6 +7,16 @@ BANKS = ["SCB", "KBank", "BBL", "TMB", "Krungsri"]
 CARD_TYPES = ["Platinum", "Gold", "Titanium", "Black Card"]
 LIFESTYLES = ["Travel", "Shopping", "Dining", "Entertainment"]
 
+# ตรวจสอบและกำหนดค่าเริ่มต้นของ session_state
+if "page" not in st.session_state:
+    st.session_state["page"] = "Login"
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if "registered" not in st.session_state:
+    st.session_state["registered"] = False
+
 db = UserDatabase("users.csv")  # กำหนด path ของ CSV
 
 def register_page():
@@ -22,15 +32,15 @@ def register_page():
         success, msg = db.register_user(username, password, bank, card_type, lifestyle)
         if success:
             st.success(msg)
-            st.session_state["registered"] = True  # ตั้งค่าตัวแปร session เพื่อแจ้งว่าลงทะเบียนแล้ว
-        else:
-            st.error(msg)
+            st.session_state["registered"] = True  # ตั้งค่าว่าลงทะเบียนแล้ว
+            st.session_state["page"] = "Login"  # เปลี่ยนไปหน้า Login
+            st.rerun()  # รีเฟรชหน้า
 
     # ถ้าลงทะเบียนเสร็จแล้ว ให้แสดงปุ่มกลับไปหน้า Login
-    if st.session_state.get("registered", False):
+    if st.session_state["registered"]:
         if st.button("🔙 Go to Login"):
-            st.session_state["registered"] = False  # รีเซ็ตค่า
-            st.experimental_set_query_params(page="Login")  # สลับหน้า
+            st.session_state["page"] = "Login"
+            st.rerun()
 
 def login_page():
     st.title("🔓 Login")
@@ -46,20 +56,15 @@ def login_page():
             st.error("❌ Invalid username or password.")
 
 def main():
-    if "logged_in" not in st.session_state:
-        st.session_state["logged_in"] = False
-
-    # ดึงค่าหน้าปัจจุบันจาก query parameter
-    query_params = st.experimental_get_query_params()
-    current_page = query_params.get("page", ["Login"])[0]  # ค่า default คือ Login
-
-    # สร้าง sidebar ให้เลือกหน้า
-    page = st.sidebar.radio("📌 Select Page", ["Login", "Register"], index=0 if current_page == "Login" else 1)
-
-    if page == "Register":
+    # ใช้ session_state ในการเปลี่ยนหน้า
+    if st.session_state["page"] == "Register":
         register_page()
     else:
         login_page()
+
+    # Sidebar สำหรับเปลี่ยนหน้า
+    page_selection = st.sidebar.radio("📌 Select Page", ["Login", "Register"])
+    st.session_state["page"] = page_selection  # อัปเดต session_state
 
 if __name__ == "__main__":
     main()
