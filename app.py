@@ -7,7 +7,7 @@ BANKS = ["SCB", "KBank", "BBL", "TMB", "Krungsri"]
 CARD_TYPES = ["Platinum", "Gold", "Titanium", "Black Card"]
 LIFESTYLES = ["Travel", "Shopping", "Dining", "Entertainment"]
 
-db = UserDatabase("users.csv")  # ต้องกำหนด path ให้ตรง
+db = UserDatabase("users.csv")  # กำหนด path ของ CSV
 
 def register_page():
     st.title("🔐 Register")
@@ -22,9 +22,15 @@ def register_page():
         success, msg = db.register_user(username, password, bank, card_type, lifestyle)
         if success:
             st.success(msg)
-            st.experimental_rerun()  # รีเฟรชหน้าให้กลับไป login
+            st.session_state["registered"] = True  # ตั้งค่าตัวแปร session เพื่อแจ้งว่าลงทะเบียนแล้ว
         else:
             st.error(msg)
+
+    # ถ้าลงทะเบียนเสร็จแล้ว ให้แสดงปุ่มกลับไปหน้า Login
+    if st.session_state.get("registered", False):
+        if st.button("🔙 Go to Login"):
+            st.session_state["registered"] = False  # รีเซ็ตค่า
+            st.experimental_set_query_params(page="Login")  # สลับหน้า
 
 def login_page():
     st.title("🔓 Login")
@@ -43,7 +49,12 @@ def main():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
 
-    page = st.sidebar.radio("📌 Select Page", ["Login", "Register"])
+    # ดึงค่าหน้าปัจจุบันจาก query parameter
+    query_params = st.experimental_get_query_params()
+    current_page = query_params.get("page", ["Login"])[0]  # ค่า default คือ Login
+
+    # สร้าง sidebar ให้เลือกหน้า
+    page = st.sidebar.radio("📌 Select Page", ["Login", "Register"], index=0 if current_page == "Login" else 1)
 
     if page == "Register":
         register_page()
