@@ -32,7 +32,7 @@ def login_page():
             st.session_state.logged_in = True
             st.session_state.username = username
             st.success("เข้าสู่ระบบสำเร็จ!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
     
