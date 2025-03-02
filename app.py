@@ -38,7 +38,7 @@ def login_page():
     
     if register_button:
         st.session_state.show_register = True
-        st.experimental_rerun()
+        st.rerun()
 
 def register_page():
     """Render registration page"""
@@ -69,13 +69,13 @@ def register_page():
             if success:
                 st.success(message)
                 st.session_state.show_register = False
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error(message)
     
     if back_button:
         st.session_state.show_register = False
-        st.experimental_rerun()
+        st.rerun()
 
 def main_app():
     """Render main application after login"""
@@ -93,7 +93,7 @@ def main_app():
     if st.button("ออกจากระบบ"):
         st.session_state.logged_in = False
         st.session_state.username = None
-        st.experimental_rerun()
+        st.rerun()
 
 def main():
     """Main function to run the app"""
